@@ -8,62 +8,38 @@ They are used for updates like this:
 This would delete the ``foo`` field from all documents where ``foo`` equals 2.
 """
 
-
 def delete(field):
     """
     Delete a given field from the document.
     """
-    def transform(doc):
-        del doc[field]
-
-    return transform
-
+    pass
 
 def add(field, n):
     """
     Add ``n`` to a given field in the document.
     """
-    def transform(doc):
-        doc[field] += n
-
-    return transform
-
+    pass
 
 def subtract(field, n):
     """
     Subtract ``n`` to a given field in the document.
     """
-    def transform(doc):
-        doc[field] -= n
-
-    return transform
-
+    pass
 
 def set(field, val):
     """
     Set a given field to ``val``.
     """
-    def transform(doc):
-        doc[field] = val
-
-    return transform
-
+    pass
 
 def increment(field):
     """
     Increment a given field in the document by 1.
     """
-    def transform(doc):
-        doc[field] += 1
-
-    return transform
-
+    pass
 
 def decrement(field):
     """
     Decrement a given field in the document by 1.
     """
-    def transform(doc):
-        doc[field] -= 1
-
-    return transform
+    pass
