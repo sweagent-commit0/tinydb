@@ -92,5 +92,11 @@ class MemoryStorage(Storage):
         """
         Create a new instance.
         """
-        super().__init__()
         self.memory = None
+
+    def read(self) -> Optional[Dict[str, Dict[str, Any]]]:
+        return self.memory
+
+    def write(self, data: Dict[str, Dict[str, Any]]) -> None:
+        self.memory = data
+

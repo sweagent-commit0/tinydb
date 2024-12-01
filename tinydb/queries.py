@@ -174,7 +174,21 @@ class Query(QueryInstance):
         :param hashval: The hash of the query.
         :return: A :class:`~tinydb.queries.QueryInstance` object
         """
-        pass
+        if not self._path and not allow_empty_path:
+            raise RuntimeError('Empty query was evaluated')
+        
+        def runner(value):
+            try:
+                for part in self._path:
+                    if isinstance(part, str):
+                        value = value[part]
+                    else:
+                        value = part(value)
+                return test(value)
+            except (KeyError, TypeError, ValueError):
+                return False
+
+        return QueryInstance(runner, hashval)
 
     def __eq__(self, rhs: Any):
         """
@@ -287,7 +301,8 @@ class Query(QueryInstance):
                      argument
         :param args: Additional arguments to pass to the test function
         """
-        pass
+        return self._generate_test(lambda value: func(value, *args),
+                                   ('test', self._path, func, args))
 
     def any(self, cond: Union[QueryInstance, List[Any]]) -> QueryInstance:
         """
@@ -311,7 +326,13 @@ class Query(QueryInstance):
                      a list of which at least one document has to be contained
                      in the tested document.
         """
-        pass
+        if isinstance(cond, QueryInstance):
+            def test(value):
+                return any(cond(item) for item in value)
+        else:
+            def test(value):
+                return any(item in cond for item in value)
+        return self._generate_test(test, ('any', self._path, freeze(cond)))
 
     def all(self, cond: Union['QueryInstance', List[Any]]) -> QueryInstance:
         """
@@ -333,6 +354,13 @@ class Query(QueryInstance):
         :param cond: Either a query that all documents have to match or a list
                      which has to be contained in the tested document.
         """
+        if isinstance(cond, QueryInstance):
+            def test(value):
+                return all(cond(item) for item in value)
+        else:
+            def test(value):
+                return all(item in value for item in cond)
+        return self._generate_test(test, ('all', self._path, freeze(cond)))
         pass
 
     def one_of(self, items: List[Any]) -> QueryInstance:
@@ -343,7 +371,8 @@ class Query(QueryInstance):
 
         :param items: The list of items to check with
         """
-        pass
+        return self._generate_test(lambda value: value in items,
+                                   ('one_of', self._path, freeze(items)))
 
     def noop(self) -> QueryInstance:
         """
@@ -351,17 +380,20 @@ class Query(QueryInstance):
 
         Useful for having a base value when composing queries dynamically.
         """
-        pass
+        return self._generate_test(lambda value: True, ('noop', self._path))
 
     def map(self, fn: Callable[[Any], Any]) -> 'Query':
         """
         Add a function to the query path. Similar to __getattr__ but for
         arbitrary functions.
         """
-        pass
+        query = type(self)()
+        query._path = self._path + (fn,)
+        query._hash = ('map', query._path) if self.is_cacheable() else None
+        return query
 
 def where(key: str) -> Query:
     """
     A shorthand for ``Query()[key]``
     """
-    pass
+    return Query()[key]

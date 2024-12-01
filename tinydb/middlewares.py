@@ -86,4 +86,6 @@ class CachingMiddleware(Middleware):
         """
         Flush all unwritten data to disk.
         """
-        pass
+        if self.cache is not None:
+            self.storage.write(self.cache)
+            self._cache_modified_count = 0

@@ -18,28 +18,39 @@ def add(field, n):
     """
     Add ``n`` to a given field in the document.
     """
-    pass
+    def transform(doc):
+        if field in doc:
+            doc[field] += n
+        return doc
+    return transform
 
 def subtract(field, n):
     """
-    Subtract ``n`` to a given field in the document.
+    Subtract ``n`` from a given field in the document.
     """
-    pass
+    def transform(doc):
+        if field in doc:
+            doc[field] -= n
+        return doc
+    return transform
 
 def set(field, val):
     """
     Set a given field to ``val``.
     """
-    pass
+    def transform(doc):
+        doc[field] = val
+        return doc
+    return transform
 
 def increment(field):
     """
     Increment a given field in the document by 1.
     """
-    pass
+    return add(field, 1)
 
 def decrement(field):
     """
     Decrement a given field in the document by 1.
     """
-    pass
+    return subtract(field, 1)
